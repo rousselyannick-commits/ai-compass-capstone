@@ -174,9 +174,9 @@ traitée dans le module de formation adapté, et reviens à l'entretien.
 
 - Modèle : Claude Sonnet (tâches complexes de cette phase)
 - Lecture catalogue : HTTP Request GET sur URL GitHub raw
-  `https://raw.githubusercontent.com/[username]/ai-compass-capstone/main/catalogue/_index.md`
+  `https://raw.githubusercontent.com/rousselyannick-commits/ai-compass-capstone/main/catalogue/_index.md`
 - Lecture fiche cas : HTTP Request GET sur URL GitHub raw
-  `https://raw.githubusercontent.com/[username]/ai-compass-capstone/main/catalogue/cas_XX_titre.md`
+  `https://raw.githubusercontent.com/rousselyannick-commits/ai-compass-capstone/main/catalogue/cas_XX_titre.md`
 - Appel ROI : sous-workflow n8n `calcul_roi` (function tool)
 - Journalisation : Google Sheets à chaque étape clé
   (profil apprenant, cas retenus, chiffres saisis, ROI calculé)
