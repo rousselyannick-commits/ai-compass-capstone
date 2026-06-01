@@ -1,0 +1,57 @@
+{
+  "name": "calcul_roi",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"cas_usage_id\": \"cas_03\",\n  \"temps_actuel_minutes\": 120,\n  \"frequence_par_semaine\": 2\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "669ff8e8-619c-4630-8230-b5ee43fbe086",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Données de test (en prod, viennent de l'agent)\nconst input = $input.first().json;\n\nconst cas_usage_id = input.cas_usage_id ?? \"cas_03\";\nconst temps_actuel_minutes = parseFloat(input.temps_actuel_minutes ?? 120);\nconst frequence_par_semaine = parseFloat(input.frequence_par_semaine ?? 2);\n\n// Constantes DEF Ouest\nconst taux_gain = 0.55;\nconst cout_horaire = 35;\nconst semaines_an = 45;\n\n// Calculs\nconst temps_actuel_hebdo = temps_actuel_minutes * frequence_par_semaine;\nconst gain_hebdo_minutes = temps_actuel_hebdo * taux_gain;\nconst gain_annuel_heures = (gain_hebdo_minutes * semaines_an) / 60;\nconst gain_annuel_euros = gain_annuel_heures * cout_horaire;\n\nreturn [{\n  json: {\n    cas_usage_id: cas_usage_id,\n    gain_hebdo_minutes: Math.round(gain_hebdo_minutes),\n    gain_annuel_heures: Math.round(gain_annuel_heures * 10) / 10,\n    gain_annuel_euros: Math.round(gain_annuel_euros)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5a29022e-2292-42b5-b716-be8d02ccab86",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "05b5fdac-5a8c-4736-a94c-d4f42f91f881",
+  "meta": {
+    "instanceId": "17b074c05058488e814433f976cc329de1697f5c1edc39f1e8f981fdf4e6c9f3"
+  },
+  "id": "8yH2twnoP0FUVsgA",
+  "tags": []
+}

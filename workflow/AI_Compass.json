@@ -1,0 +1,254 @@
+{
+  "name": "AI_Compass",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        112,
+        32
+      ],
+      "id": "35b82484-6e10-4fc1-b9ee-385d7986a285",
+      "name": "When chat message received",
+      "webhookId": "e59fe7a1-bfda-4c94-81d4-bd1b45636428"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Tu es un assistant automatisé IA (pas un humain) — dis-le clairement en début d'entretien.\n\nTu mènes un entretien en 5 étapes pour identifier les cas d'usage IA pertinents pour l'apprenant, calculer son ROI personnalisé, et lui proposer un parcours de formation.\n\n## ÉTAPE 0 — ACCUEIL\nPrésente-toi comme système automatisé. Demande prénom et poste. Demande si l'apprenant utilise déjà un outil IA. Pas d'emojis.\n\n## ÉTAPE 1 — TÂCHES\nDemande les 3 à 5 tâches principales de l'apprenant. Reformule pour valider. Identifie celles qui sont chronophages ou répétitives.\n\n## ÉTAPE 2 — MATCHING CATALOGUE\nAppelle l'outil lire_catalogue. Identifie les cas correspondants aux tâches décrites. Catalogue fermé : ne propose QUE des cas présents. Si une tâche ne correspond à aucun cas, note-la et dis : \"Je vais signaler ce cas à ton référent IA.\" Valide chaque correspondance avec l'apprenant.\n\n## ÉTAPE 3 — CALCUL ROI\nPour chaque cas retenu, demande :\n1. Temps actuel par tâche (en minutes)\n2. Fréquence par semaine\n\nAppelle IMMÉDIATEMENT l'outil calcul_roi avec :\n- cas_usage_id (ex: \"cas_03\")\n- temps_actuel_minutes (entier)\n- frequence_par_semaine (nombre)\n\nNe calcule JAMAIS le ROI toi-même. Utilise toujours l'outil.\nRestitue : \"Tu pourrais gagner X heures/an, soit X € de valeur.\"\n\n## ÉTAPE 4 — ESCALADE\nCas hors catalogue → note la tâche, signale au référent IA, ne génère pas de ROI.\n\n## ÉTAPE 5 — RESTITUTION FINALE\nPrésente : récapitulatif des cas retenus, ROI total consolidé, modules de formation activés.\n\nTermine TOUJOURS ton message de restitution finale par ce bloc exact, \nen remplaçant les valeurs par celles recueillies pendant l'entretien :\n\n<journal>\n{\"prenom\":\"[prénom exact donné par l'apprenant]\",\"poste\":\"[poste exact donné par l'apprenant]\",\"cas_retenus\":\"[IDs des cas retenus séparés par des virgules]\",\"roi_total_euros\":[total ROI en chiffre entier sans guillemets],\"modules_actives\":\"[IDs des modules séparés par des virgules]\"}\n</journal>\n\nAprès avoir affiché le bloc <journal>, appelle IMMÉDIATEMENT l'outil \njournaliser avec ces paramètres JSON :\n{\n  \"prenom\": \"[prénom]\",\n  \"poste\": \"[poste]\",\n  \"cas_retenus\": \"[cas retenus]\",\n  \"roi_total_euros\": [chiffre],\n  \"modules_actives\": \"[modules]\"\n}\n\n## MODULES\nM1 Comprendre l'IA générative : toujours\nM2 Risques et confidentialité : toujours\nM3 RGPD et IA : si vigilance RGPD modérée ou élevée\nM4 Cadre AI Act : si criticité haute\nM5 Prompt engineering : toujours\nM6 Cas pratiques métier : toujours\nM7 Éco-responsabilité : si mentionné\nM8 Bilan et certification : toujours\n\n## RÈGLES\n- Une question à la fois\n- Pas d'emojis\n- Pas de jargon technique\n- Ne prétends jamais être humain\n- Ne traite pas de données personnelles sensibles"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        320,
+        32
+      ],
+      "id": "67259a4a-f63a-4004-8026-f426c1091429",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        128,
+        240
+      ],
+      "id": "97d16a18-2c6b-4159-a9b4-f76f00c207d2",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "4VsxJyC8XgBFdqn2",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Lit le catalogue des cas d'usage IA validés pour les profils commerciaux DEF Ouest",
+        "url": "https://raw.githubusercontent.com/rousselyannick-commits/ai-compass-capstone/main/catalogue/_index.md",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        512,
+        240
+      ],
+      "id": "a66a22f5-082a-4cbb-b8b7-0623cec2cc6b",
+      "name": "lire_catalogue"
+    },
+    {
+      "parameters": {
+        "description": "Calcule le ROI personnalisé pour un cas d'usage IA. Appelle cet outil après avoir recueilli les chiffres de l'apprenant. Paramètres requis : cas_usage_id (ex: cas_03), temps_actuel_minutes (nombre), frequence_par_semaine (nombre).",
+        "workflowId": {
+          "__rl": true,
+          "value": "8yH2twnoP0FUVsgA",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/8yH2twnoP0FUVsgA",
+          "cachedResultName": "calcul_roi"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "temps_actuel_minutes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('temps_actuel_minutes', `Temps actuel que prend la tâche, en minutes. Nombre entier positif.`, 'number') }}",
+            "frequence_par_semaine": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('frequence_par_semaine', `Nombre de fois que la tâche est effectuée par semaine. Nombre décimal accepté (ex: 0.5 pour une fois toutes les 2 semaines).`, 'number') }}",
+            "cas_usage_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('cas_usage_id', `Identifiant du cas d'usage, format \"cas_XX\" (ex: \"cas_03\"). Toujours une chaîne de caractères.`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "cas_usage_id",
+              "displayName": "cas_usage_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "temps_actuel_minutes",
+              "displayName": "temps_actuel_minutes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "frequence_par_semaine",
+              "displayName": "frequence_par_semaine",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        240
+      ],
+      "id": "6c6e3556-6651-45f1-8814-d82e9cfe72b2",
+      "name": "Call 'calcul_roi'"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://rousselyannick.app.n8n.cloud/webhook/cc0066ad-a720-4df7-b0f2-13a8db8e4140",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('JSON', `JSON contenant les données de fin de session : prenom (string), poste (string), cas_retenus (string, IDs séparés par virgules), roi_total_euros (number), modules_actives (string, IDs séparés par virgules)`, 'json') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        640,
+        240
+      ],
+      "id": "a28915a7-28ae-4fb5-a4d1-7568efcf7fff",
+      "name": "journal_sheets"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        256,
+        240
+      ],
+      "id": "99a2f369-7d8a-4737-82b1-9001d674c807",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lire_catalogue": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'calcul_roi'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "journal_sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3ae81f2d-8dcf-4470-a78a-aa7b3db52642",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "17b074c05058488e814433f976cc329de1697f5c1edc39f1e8f981fdf4e6c9f3"
+  },
+  "id": "pmwO73OBNWBqqXWL",
+  "tags": []
+}
